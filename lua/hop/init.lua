@@ -629,7 +629,7 @@ end
 -- Run an arbitrary command at the target.
 --
 -- This will not update the jump list.
-function M.cmd_with(jump_target_gtr, cmd, opts)
+function M.cmd_with(jump_target_gtr, cmd, post_cmd, opts)
     if opts == nil then
         opts = override_opts(opts)
     end
@@ -644,12 +644,14 @@ function M.cmd_with(jump_target_gtr, cmd, opts)
         local pos = vim.api.nvim_win_get_cursor(0)
         M.move_cursor_to(jt.window, jt.line + 1, jt.column - 1, opts.hint_offset)
         vim.cmd(cmd)
-        print('jumping back to', vim.inspect(pos))
         M.move_cursor_to(win, pos[1], pos[2], 0)
+        if post_cmd then
+            vim.cmd(post_cmd)
+        end
     end)
 end
 
-function M.cmd_words(cmd, opts)
+function M.cmd_words(cmd, post_cmd, opts)
     opts = override_opts(opts)
     local jump_target = require 'hop.jump_target'
 
@@ -663,6 +665,7 @@ function M.cmd_words(cmd, opts)
     M.cmd_with(
         generator(jump_target.regex_by_word_start()),
         cmd,
+        post_cmd,
         opts
     )
 end
